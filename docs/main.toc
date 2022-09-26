@@ -1,0 +1,35 @@
+\babel@toc {russian}{}\relax 
+\contentsline {section}{ВВЕДЕНИЕ}{5}{Doc-Start}%
+\contentsline {section}{\numberline {1}Аналитическая часть}{6}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Описание трёхмерного объекта}{6}{subsection.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.1}Геометрические примитивы}{6}{subsubsection.1.1.1}%
+\contentsline {subsubsection}{\numberline {1.1.2}Воксельная модель}{6}{subsubsection.1.1.2}%
+\contentsline {subsubsection}{\numberline {1.1.3}Полигональная модель}{7}{subsubsection.1.1.3}%
+\contentsline {subsubsection}{\numberline {1.1.4}Вывод}{7}{subsubsection.1.1.4}%
+\contentsline {subsection}{\numberline {1.2}Алгоритм построения трёхмерного изображения}{8}{subsection.1.2}%
+\contentsline {subsubsection}{\numberline {1.2.1}Алгоритм с Z-буфером}{8}{subsubsection.1.2.1}%
+\contentsline {subsubsection}{\numberline {1.2.2}Алгоритм с обратной трассировкой лучей}{9}{subsubsection.1.2.2}%
+\contentsline {subsubsection}{\numberline {1.2.3}Вывод}{10}{subsubsection.1.2.3}%
+\contentsline {subsection}{\numberline {1.3}Алгоритмы наложения текстур на трёхмерные объекты}{10}{subsection.1.3}%
+\contentsline {subsubsection}{\numberline {1.3.1}Афинное текстурирование}{10}{subsubsection.1.3.1}%
+\contentsline {subsubsection}{\numberline {1.3.2}Перспективно-корректное текстурирование}{10}{subsubsection.1.3.2}%
+\contentsline {subsubsection}{\numberline {1.3.3}Вывод}{11}{subsubsection.1.3.3}%
+\contentsline {subsection}{\numberline {1.4}Модель освещения трёхмерных объектов}{11}{subsection.1.4}%
+\contentsline {subsubsection}{\numberline {1.4.1}Модель Ламберта}{11}{subsubsection.1.4.1}%
+\contentsline {subsubsection}{\numberline {1.4.2}Модель Фонга}{11}{subsubsection.1.4.2}%
+\contentsline {subsubsection}{\numberline {1.4.3}Модель Уиттеда}{12}{subsubsection.1.4.3}%
+\contentsline {subsubsection}{\numberline {1.4.4}Вывод}{13}{subsubsection.1.4.4}%
+\contentsline {section}{\numberline {2}Конструкторская часть}{14}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Реализация алгоритма обратной трассировки лучей}{14}{subsection.2.1}%
+\contentsline {subsubsection}{\numberline {2.1.1}Алгоритм обратной трассировки лучей}{14}{subsubsection.2.1.1}%
+\contentsline {subsubsection}{\numberline {2.1.2}Нахождение пересечения с полигоном}{16}{subsubsection.2.1.2}%
+\contentsline {subsubsection}{\numberline {2.1.3}Нахождение пересечения с объемлющей оболочкой}{17}{subsubsection.2.1.3}%
+\contentsline {subsubsection}{\numberline {2.1.4}Ускорение алгоритма трассировки лучей}{18}{subsubsection.2.1.4}%
+\contentsline {subsection}{\numberline {2.2}Реализация модели освещения Уиттеда}{19}{subsection.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.1}Нахождение отражённого луча}{19}{subsubsection.2.2.1}%
+\contentsline {subsubsection}{\numberline {2.2.2}Нахождение преломлённого луча}{19}{subsubsection.2.2.2}%
+\contentsline {subsubsection}{\numberline {2.2.3}Общая реализация модели освещения Уиттеда}{20}{subsubsection.2.2.3}%
+\contentsline {subsubsection}{\numberline {2.2.4}Расчёт интенсивностей}{20}{subsubsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.3}Выбор используемых типов данных}{21}{subsection.2.3}%
+\contentsline {section}{ЗАКЛЮЧЕНИЕ}{22}{subsection.2.3}%
+\contentsline {section}{СПИСОК ИСПОЛЬЗОВАННЫХ ИСТОЧНИКОВ}{23}{subsection.2.3}%
