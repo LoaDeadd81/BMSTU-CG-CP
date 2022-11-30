@@ -17,15 +17,5 @@ public:
     Vec3d direction;
 };
 
-class IntersectionData
-{
-public:
-    IntersectionData() = default;
-    //todo add fields and constructors
-public:
-    Color color;
-    double t;
-};
-
 
 #endif

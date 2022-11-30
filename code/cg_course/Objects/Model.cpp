@@ -1,6 +1,7 @@
 #include "Model.h"
 
-Sphere::Sphere(Point3d center, double r, Color color) : center(center), radius(r), color(color)
+Sphere::Sphere(Point3d center, double r, Color color, ObjectProperties props) : center(center), radius(r), color(color),
+                                                                                properties(props)
 {
 
 }
@@ -23,6 +24,9 @@ bool Sphere::intersect(const Ray &ray, IntersectionData &data)
 
     data.t = (-half_b - sqrt(discriminant)) / a;
     data.color = color;
+    data.p = ray.at(data.t);
+    data.n = data.p - center;
+    data.n.norm();
     return true;
 }
 
@@ -34,4 +38,9 @@ void Sphere::setTexture(const string &path)
 void Sphere::setColor(const Color &&clr)
 {
     color = clr;
+}
+
+ObjectProperties &Sphere::props()
+{
+    return properties;
 }

@@ -120,6 +120,8 @@ template<typename T, std::size_t N>
 Vec<T, N> &Vec<T, N>::operator=(Vec<T, N> &&other)
 {
     arr = std::move(other.arr);
+
+    return *this;
 }
 
 template<typename T, std::size_t N>
@@ -265,8 +267,15 @@ Vec<T, N>::operator QColor() const
         throw DimensionError(__FILE__, __FUNCTION__, __LINE__,
                              "Can't cast to QColor, vectors of dimension 3 are needed");
 
-    //todo mb add interval [0, 255]
-    return {int(arr[0]), int(arr[1]), int(arr[2])};
+    int res[3] = {arr[0], arr[1], arr[2]};
+
+    for (auto &re: res)
+    {
+        if (re < 0) re = 0;
+        if (re > 255) re = 255;
+    }
+
+    return {int(res[0]), int(res[1]), int(res[2])};
 }
 
 #endif

@@ -19,7 +19,7 @@ void AddModelCommand::execute(shared_ptr<Scene> scene)
     scene->add(model);
 }
 
-AddLightCommand::AddLightCommand(shared_ptr<BaseLight> light) : light(light)
+AddLightCommand::AddLightCommand(shared_ptr<Light> light) : light(light)
 {
 
 }
@@ -83,7 +83,7 @@ void TransformCameraCommand::execute(shared_ptr<Scene> scene)
     scene->Camera()->transform(transform_matrix);
 }
 
-RenderCommand::RenderCommand(shared_ptr<BaseDrawer> drawer, CameraProperties properties)
+RenderCommand::RenderCommand(shared_ptr<BaseDrawer> drawer, RenderProperties properties)
         : drawer(drawer), props(properties)
 {
 
@@ -99,13 +99,9 @@ void RenderCommand::execute(shared_ptr<Scene> scene)
 
     Point3d origin = {0, 0, 0};
     Vec3d horizontal = {viewport_width, 0, 0}, vertical = {0, viewport_height, 0};
-    IntersectionData data;
-
     Point3d lower_left_corner = origin - horizontal / 2 - vertical / 2 - Point3d{0, 0, focal_length};
 
-    double min_t = std::numeric_limits<double>::max();
     Color color{0, 0, 0};
-    bool flag = false;
 
     for (int j = 0; j < height; j++)
     {
@@ -117,19 +113,108 @@ void RenderCommand::execute(shared_ptr<Scene> scene)
             dir.norm();
             Ray r(origin, dir);
 
-            for (auto it = scene->ModelsBegin(); it != scene->ModelsEnd(); it++)
-            {
-                if ((*it)->intersect(r, data) && data.t < min_t)
-                {
-                    min_t = data.t;
-                    color = data.color;
-                    flag = true;
-                }
-            }
+            bool flag = emitRay(scene, r, color, props.max_depth);
+
             if (flag)
-                drawer->draw_pixel(i, j, color);
-            flag = false;
-            min_t = std::numeric_limits<double>::max();
+                drawer->draw_pixel(i, height - j, color);
         }
     }
+}
+
+bool RenderCommand::emitRay(shared_ptr<Scene> scene, Ray r, Color &color, int depth)
+{
+    IntersectionData data;
+    color = {0, 0, 0};
+
+    bool flag = closest_intersection(scene, r, data), ref_flag = false;
+
+    if (!flag)
+        return false;
+
+    color = data.color * computeLight(scene, data.p, data.n, -r.direction, (*data.iter)->props());
+
+    if (depth <= 0 || (*data.iter)->props().reflective <= 0)
+        return true;
+
+    Ray ref_ray(data.p, reflectedRay(-r.direction, data.n));
+    Color ref_color;
+
+    ref_flag = emitRay(scene, ref_ray, ref_color, depth - 1);
+
+    if (ref_flag)
+        color += (*data.iter)->props().reflective * ref_color;
+
+    return true;
+}
+
+bool
+RenderCommand::closest_intersection(shared_ptr<Scene> scene, Ray r, IntersectionData &data, double t_min, double t_max)
+{
+    IntersectionData cur_data;
+    data.t = std::numeric_limits<double>::max();
+    bool flag = false;
+
+    for (auto it = scene->ModelsBegin(); it != scene->ModelsEnd(); it++)
+        if ((*it)->intersect(r, cur_data) && cur_data.t < data.t && cur_data.t > EPS)
+        {
+            flag = true;
+            data = cur_data;
+            data.iter = it;
+        }
+
+    if (flag)
+        return t_min <= data.t && data.t <= t_max;
+
+    return false;
+}
+
+double RenderCommand::computeLight(shared_ptr<Scene> scene, Point3d p, Vec3d n, Vec3d v, ObjectProperties prop)
+{
+    double res = props.ambient;
+
+    IntersectionData data;
+
+    for (auto it = scene->LightsBegin(); it != scene->LightsEnd(); it++)
+    {
+        Vec3d l = (*it)->origin - p;
+
+        //todo баг когда в источник света за объектом (вроде поправил)
+        bool is_light = closest_intersection(scene, {p, l}, data, EPS, 1);
+        if (is_light)
+            continue;
+
+        res += diffuse_reflection(it, l, p, n);
+        res += mirror_reflection(it, l, p, n, v, prop.shine); //todo светится с обратной стороны от источника
+    }
+
+    return res;
+}
+
+double RenderCommand::diffuse_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n)
+{
+    double n_dot_l = n & l;
+    if (n_dot_l > 0)
+        return (*it)->I * n_dot_l / (n.len() * l.len());
+    return 0;
+}
+
+double RenderCommand::mirror_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n, Vec3d v, double s)
+{
+    Vec3d r = reflectedRay(l, n);
+
+//    double r_dot_v = r & v, n_dot_l = n & l;
+//    if (n_dot_l > 0 && r_dot_v > 0)
+//        return (*it)->I * pow(r_dot_v / (r.len() * v.len()), s);
+//    return 0;
+
+    double r_dot_v = r & v;
+    if (r_dot_v > 0)
+        return (*it)->I * pow(r_dot_v / (r.len() * v.len()), s);
+    return 0;
+
+}
+
+Vec3d RenderCommand::reflectedRay(Vec3d l, Vec3d n)
+{
+    return 2.0 * n * (n & l) - l;
 }

@@ -10,11 +10,11 @@ class Scene
 {
 public:
     using ModelIter = std::vector<shared_ptr<BaseModel>>::iterator;
-    using LightIter = std::vector<shared_ptr<BaseLight>>::iterator;
+    using LightIter = std::vector<shared_ptr<Light>>::iterator;
 
     void add(const shared_ptr<BaseModel> model);
 
-    void add(const shared_ptr<BaseLight> light);
+    void add(const shared_ptr<Light> light);
 
     void remove(ModelIter iter);
 
@@ -32,7 +32,7 @@ public:
 
 private:
     std::vector<shared_ptr<BaseModel>> model_list;
-    std::vector<shared_ptr<BaseLight>> light_list;
+    std::vector<shared_ptr<Light>> light_list;
     shared_ptr<BaseCamera> camera;
 };
 

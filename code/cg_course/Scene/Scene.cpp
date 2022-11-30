@@ -5,7 +5,7 @@ void Scene::add(const shared_ptr<BaseModel> model)
     model_list.push_back(model);
 }
 
-void Scene::add(const shared_ptr<BaseLight> light)
+void Scene::add(const shared_ptr<Light> light)
 {
     light_list.push_back(light);
 }
@@ -32,7 +32,7 @@ Scene::ModelIter Scene::ModelsEnd()
 
 Scene::LightIter Scene::LightsBegin()
 {
-    return light_list.end();
+    return light_list.begin();
 }
 
 Scene::LightIter Scene::LightsEnd()

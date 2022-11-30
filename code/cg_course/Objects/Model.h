@@ -3,10 +3,16 @@
 
 #include "Matrix.h"
 #include "GeometryPrimitives.h"
+#include "Properies.h"
+
+
+class IntersectionData;
 
 class BaseModel
 {
 public:
+    using ModelIter = std::vector<shared_ptr<BaseModel>>::iterator;
+
     virtual ~BaseModel() = default;
 
     virtual void transform(const Matix4x3d &transform_matrix) = 0;
@@ -16,7 +22,8 @@ public:
     virtual void setTexture(const string &path) = 0;
 
     virtual void setColor(const Color &&clr) = 0;
-//    virtual void set
+
+    virtual ObjectProperties &props() = 0;
 };
 
 class Sphere : public BaseModel
@@ -24,7 +31,7 @@ class Sphere : public BaseModel
 public:
     Sphere() = default;
 
-    Sphere(Point3d center, double r, Color color = {255, 255, 255});
+    Sphere(Point3d center, double r, Color color, ObjectProperties props);
 
     virtual ~Sphere() = default;
 
@@ -36,10 +43,27 @@ public:
 
     virtual void setColor(const Color &&clr) override;
 
+    virtual ObjectProperties &props() override;
+
 private:
     Point3d center;
     double radius;
     Color color;
+    ObjectProperties properties;
 };
+
+class IntersectionData
+{
+public:
+    IntersectionData() = default;
+    //todo add fields and constructors
+public:
+    Point3d p;
+    Vec3d n;
+    Color color;
+    double t;
+    BaseModel::ModelIter iter;
+};
+
 
 #endif

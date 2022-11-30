@@ -8,6 +8,9 @@
 #include "Drawer.h"
 #include "Transformation.h"
 #include "Properies.h"
+#include "Scene.h"
+
+#define EPS 1e-6
 
 enum class TransformType
 {
@@ -44,14 +47,14 @@ class AddLightCommand : public BaseCommand
 public:
     AddLightCommand() = default;
 
-    AddLightCommand(shared_ptr<BaseLight> light);
+    AddLightCommand(shared_ptr<Light> light);
 
     virtual ~AddLightCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    shared_ptr<BaseLight> light;
+    shared_ptr<Light> light;
 };
 
 class DelModelCommand : public BaseCommand
@@ -137,15 +140,32 @@ class RenderCommand : public BaseCommand
 public:
     RenderCommand() = default;
 
-    RenderCommand(shared_ptr<BaseDrawer> drawer, CameraProperties properties);
+    RenderCommand(shared_ptr<BaseDrawer> drawer, RenderProperties properties);
 
     virtual ~RenderCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
+    Vec3d reflectedRay(Vec3d l, Vec3d n);
+
+    bool emitRay(shared_ptr<Scene> scene, Ray r, Color &color, int depth);
+
+    bool closest_intersection(shared_ptr<Scene> scene, Ray r, IntersectionData &data,
+                              double t_min = EPS,
+                              double t_max = std::numeric_limits<double>::max()
+    );
+
+    double computeLight(shared_ptr<Scene> scene, Point3d p, Vec3d n, Vec3d v, ObjectProperties prop);
+
+    double diffuse_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n);
+
+    double mirror_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n, Vec3d v, double s);
+
+private:
     shared_ptr<BaseDrawer> drawer;
-    CameraProperties props;
+    RenderProperties props;
 };
+
 
 #endif

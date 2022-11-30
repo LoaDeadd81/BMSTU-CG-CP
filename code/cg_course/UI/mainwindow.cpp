@@ -6,7 +6,7 @@
 
 #define MODELS 0
 #define LIGHTS 1
-#define Camera 1
+#define Camera 2
 
 MainWindow::MainWindow(QWidget *parent)
         : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -27,10 +27,37 @@ MainWindow::~MainWindow()
 void MainWindow::on_RenderButton_clicked()
 {
     shared_ptr<BaseDrawer> drawer = make_shared<QtDrawer>(pixmap);
-    CameraProperties props = {WIDTH, HEIGHT, 3, 1};
+    RenderProperties props = {WIDTH, HEIGHT, 1, 1, 0.1, 3};
     shared_ptr<BaseCommand> command = make_shared<RenderCommand>(drawer, props);
 
     manager.execute(command);
+
+//    const int N = 4;
+//    int dir_arr[N][2] = {{-1, 0},
+//                         {1,  0},
+//                         {0,  -1},
+//                         {0,  1}};
+//
+//    QImage img = pixmap->toImage();
+//
+//    for (int j = 1; j < HEIGHT - 1; j++)
+//    {
+//        for (int i = 1; i < WIDTH - 1; i++)
+//        {
+//            Vec3d arr;
+//            for (auto & k : dir_arr)
+//            {
+//                QColor color = img.pixelColor(i + k[0], HEIGHT - (j + k[1]));
+//                arr[0] += color.red();
+//                arr[1] += color.green();
+//                arr[2] += color.blue();
+//            }
+//
+//            arr /= N;
+//
+//            drawer->draw_pixel(i, HEIGHT - j, arr);
+//        }
+//    }
 
     scene->addPixmap(*pixmap);
 }
@@ -39,20 +66,25 @@ void MainWindow::on_RenderButton_clicked()
 void MainWindow::on_AddObjectButton_clicked()
 {
     //todo rework
-    Color red{255, 0, 0}, gren{0, 0, 255}, blue{0, 0, 255};
-    Point3d p = {1, 1, -5}, p2 = {-1, 1, -5}, p3 = {1, -1, -5}, p4 = {-1, -1, -5};
+    Color red{255, 0, 0}, gren{0, 255, 0}, blue{0, 0, 255}, yellow{255, 255, 0};
+    Point3d p = {0, -22, -10}, p2 = {0, -1, -10}, p3 = {-6, -1, -10}, p4 = {6, -1, -10}, l = {0, 2, -20}, l2 = {0, 5,
+                                                                                                                -5};
 
-    shared_ptr<BaseCommand> com1, com2, com3, com4;
+    shared_ptr<BaseCommand> com1, com2, com3, com4, com5, com6;
 
-    com1 = make_shared<AddModelCommand>(make_shared<Sphere>(p, 3));
-    com2 = make_shared<AddModelCommand>(make_shared<Sphere>(p2, 2, red));
-    com3 = make_shared<AddModelCommand>(make_shared<Sphere>(p3, 2, gren));
-    com4 = make_shared<AddModelCommand>(make_shared<Sphere>(p4, 1, blue));
+    com1 = make_shared<AddModelCommand>(make_shared<Sphere>(p, 20, yellow, ObjectProperties(1, 0.1)));
+    com2 = make_shared<AddModelCommand>(make_shared<Sphere>(p2, 2, red, ObjectProperties(1, 0.2)));
+    com3 = make_shared<AddModelCommand>(make_shared<Sphere>(p3, 2, gren, ObjectProperties(1, 0)));
+    com4 = make_shared<AddModelCommand>(make_shared<Sphere>(p4, 2, blue, ObjectProperties(1, 0.5)));
+    com5 = make_shared<AddLightCommand>(make_shared<Light>(l, 0.5));
+    com6 = make_shared<AddLightCommand>(make_shared<Light>(l2, 0.5));
 
     manager.execute(com1);
     manager.execute(com2);
     manager.execute(com3);
     manager.execute(com4);
+    manager.execute(com5);
+    manager.execute(com6);
 }
 
 
