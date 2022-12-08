@@ -62,8 +62,12 @@ private:
     Ui::MainWindow *ui;
     shared_ptr<QGraphicsScene> scene;
     shared_ptr<QPixmap> pixmap;
+    shared_ptr<BaseRenderer> renderer;
+    shared_ptr<BaseDrawer> drawer;
 
     SceneManager manager;
+
+    RenderProperties render_props;
 };
 
 #endif // MAINWINDOW_H

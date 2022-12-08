@@ -16,7 +16,7 @@ public:
 
     Vec(const Vec<T, N> &other);
 
-    Vec(Vec<T, N> &&other);
+    Vec(Vec<T, N> &&other) noexcept;
 
     Vec(std::initializer_list<T> list);
 
@@ -95,7 +95,7 @@ Vec<T, N>::Vec(const Vec<T, N> &other) : arr(other.arr)
 }
 
 template<typename T, std::size_t N>
-Vec<T, N>::Vec(Vec<T, N> &&other) : arr(std::move(arr))
+Vec<T, N>::Vec(Vec<T, N> &&other) noexcept: arr(std::move(other.arr))
 {
 
 }
@@ -267,12 +267,29 @@ Vec<T, N>::operator QColor() const
         throw DimensionError(__FILE__, __FUNCTION__, __LINE__,
                              "Can't cast to QColor, vectors of dimension 3 are needed");
 
-    int res[3] = {arr[0], arr[1], arr[2]};
+    double res[3] = {arr[0], arr[1], arr[2]};
+    bool flag = false;
 
     for (auto &re: res)
+        if (re > 255.0)
+        {
+            flag = true;
+            break;
+        }
+
+    if (flag)
     {
-        if (re < 0) re = 0;
-        if (re > 255) re = 255;
+        double max = 0;
+
+        for (auto &re: res)
+            if (re > max)
+                max = re;
+
+        for (auto &re: res)
+        {
+            re /= max;
+            re *= 255.0;
+        }
     }
 
     return {int(res[0]), int(res[1]), int(res[2])};

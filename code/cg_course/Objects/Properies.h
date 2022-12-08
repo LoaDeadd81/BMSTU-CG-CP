@@ -21,10 +21,11 @@ class ObjectProperties
 public:
     ObjectProperties() = default;
 
-    ObjectProperties(double shine, double reflective) : shine(shine), reflective(reflective)
+    ObjectProperties(double diffuse, double specular, double shine, double reflective, double refraction)
+            : diffuse(diffuse), specular(specular), shine(shine), reflective(reflective), refraction(refraction)
     {};
 public:
-    double shine, reflective;
+    double diffuse, specular, shine, reflective, refraction;
 };
 
 class LightProperties

@@ -5,12 +5,9 @@
 #include "Model.h"
 #include "Light.h"
 #include "Scene.h"
-#include "Drawer.h"
 #include "Transformation.h"
-#include "Properies.h"
 #include "Scene.h"
-
-#define EPS 1e-6
+#include "Render.h"
 
 enum class TransformType
 {
@@ -140,32 +137,49 @@ class RenderCommand : public BaseCommand
 public:
     RenderCommand() = default;
 
-    RenderCommand(shared_ptr<BaseDrawer> drawer, RenderProperties properties);
+    RenderCommand(shared_ptr<BaseRenderer> renderer);
 
     virtual ~RenderCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    Vec3d reflectedRay(Vec3d l, Vec3d n);
-
-    bool emitRay(shared_ptr<Scene> scene, Ray r, Color &color, int depth);
-
-    bool closest_intersection(shared_ptr<Scene> scene, Ray r, IntersectionData &data,
-                              double t_min = EPS,
-                              double t_max = std::numeric_limits<double>::max()
-    );
-
-    double computeLight(shared_ptr<Scene> scene, Point3d p, Vec3d n, Vec3d v, ObjectProperties prop);
-
-    double diffuse_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n);
-
-    double mirror_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n, Vec3d v, double s);
-
-private:
-    shared_ptr<BaseDrawer> drawer;
-    RenderProperties props;
+    shared_ptr<BaseRenderer> renderer;
 };
+
+//class RenderCommand : public BaseCommand
+//{
+//public:
+//    RenderCommand() = default;
+//
+//    RenderCommand(shared_ptr<BaseDrawer> drawer, RenderProperties properties);
+//
+//    virtual ~RenderCommand() override = default;
+//
+//    virtual void execute(shared_ptr<Scene> scene) override;
+//
+//private:
+//    Vec3d refractedRay(Vec3d l, Vec3d n, double mi);
+//
+//    Vec3d reflectedRay(Vec3d l, Vec3d n);
+//
+//    bool emitRay(shared_ptr<Scene> scene, Ray r, Color &color, int depth);
+//
+//    bool closest_intersection(shared_ptr<Scene> scene, Ray r, IntersectionData &data,
+//                              double t_min = EPS,
+//                              double t_max = std::numeric_limits<double>::max()
+//    );
+//
+//    double computeLight(shared_ptr<Scene> scene, Point3d p, Vec3d n, Vec3d v, ObjectProperties prop);
+//
+//    double diffuse_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n);
+//
+//    double mirror_reflection(Scene::LightIter it, Vec3d l, Point3d p, Vec3d n, Vec3d v, double s);
+//
+//private:
+//    shared_ptr<BaseDrawer> drawer;
+//    RenderProperties props;
+//};
 
 
 #endif

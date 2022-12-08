@@ -5,6 +5,7 @@
 #include "GeometryPrimitives.h"
 #include "Properies.h"
 
+#define ACC_EPS 1e-4
 
 class IntersectionData;
 
@@ -52,6 +53,33 @@ private:
     ObjectProperties properties;
 };
 
+class Plane : public BaseModel
+{
+public:
+    Plane() = default;
+
+    Plane(Vec3d normal, double d, Color color, ObjectProperties props);
+
+    virtual ~Plane() = default;
+
+    virtual void transform(const Matix4x3d &transform_matrix) override;
+
+    virtual bool intersect(const Ray &ray, IntersectionData &data) override;
+
+    virtual void setTexture(const string &path) override;
+
+    virtual void setColor(const Color &&clr) override;
+
+    virtual ObjectProperties &props() override;
+
+private:
+    double a, b, c, d;
+    Vec3d normal;
+    Point3d point;
+    Color color;
+    ObjectProperties properties;
+};
+
 class IntersectionData
 {
 public:
@@ -59,9 +87,9 @@ public:
     //todo add fields and constructors
 public:
     Point3d p;
+    double t;
     Vec3d n;
     Color color;
-    double t;
     BaseModel::ModelIter iter;
 };
 
