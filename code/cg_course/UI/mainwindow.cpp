@@ -33,7 +33,16 @@ void MainWindow::on_RenderButton_clicked()
 {
     shared_ptr<BaseCommand> command = make_shared<RenderCommand>(renderer);
 
+    std::clock_t start, end;
+
+    start = std::clock();
     manager.execute(command);
+    end = std::clock();
+
+    string res = "time: ";
+    res += to_string(double(end - start) / CLOCKS_PER_SEC);
+
+    ui->label->setText(QString::fromStdString(res));
 
 //    const int N = 4;
 //    int dir_arr[N][2] = {{-1, 0},
@@ -70,15 +79,15 @@ void MainWindow::on_AddObjectButton_clicked()
 {
     //todo rework
     Color red{255, 0, 0}, gren{0, 255, 0}, blue{0, 0, 255}, yellow{255, 255, 0}, black{0, 0, 0}, white{230, 230, 230};
-    Point3d p = {0, 1, 0}, p2 = {-5, -5, -20}, p3 = {0, 2, -20}, p4 = {8, 8, -20}, l = {5, 5, -5}, l2 = {7, 7, -5},
+    Point3d p = {0, 1, 0}, p2 = {-5, -5, -20}, p3 = {0, 2, -20}, p4 = {8, 8, -20}, l = {5, 5, -5}, l2 = {-5, -5, -5},
             n1 = {1, 0, 0}, n2 = {0, 0, 1};
 
     shared_ptr<BaseCommand> com1, com2, com3, com4, com5, com6, com7, com8, com9, com10;
 
     com1 = make_shared<AddModelCommand>(make_shared<Plane>(p, 10, white, ObjectProperties(1, 1, 1, 0, 0)));
-    com2 = make_shared<AddModelCommand>(make_shared<Sphere>(p2, 2, red, ObjectProperties(1, 1, 1, 0, 0)));
-    com3 = make_shared<AddModelCommand>(make_shared<Sphere>(p3, 2, gren, ObjectProperties(1, 1, 1, 0, 0)));
-    com4 = make_shared<AddModelCommand>(make_shared<Sphere>(p4, 2, black, ObjectProperties(1, 1, 1, 0, 0.8)));
+    com2 = make_shared<AddModelCommand>(make_shared<Sphere>(p2, 2, gren, ObjectProperties(1, 1, 1, 0, 0)));
+    com3 = make_shared<AddModelCommand>(make_shared<Sphere>(p3, 2, black, ObjectProperties(1, 1, 1, 1, 0)));
+    com4 = make_shared<AddModelCommand>(make_shared<Sphere>(p4, 2, black, ObjectProperties(1, 1, 1, 0, 1)));
     com5 = make_shared<AddLightCommand>(make_shared<Light>(l, 0.5));
     com6 = make_shared<AddLightCommand>(make_shared<Light>(l2, 0.5));
     com7 = make_shared<AddModelCommand>(make_shared<Plane>(p, -10, white, ObjectProperties(1, 1, 1, 0, 0)));
@@ -91,7 +100,7 @@ void MainWindow::on_AddObjectButton_clicked()
     manager.execute(com3);
     manager.execute(com4);
     manager.execute(com5);
-//    manager.execute(com6);
+    manager.execute(com6);
     manager.execute(com7);
     manager.execute(com8);
     manager.execute(com9);

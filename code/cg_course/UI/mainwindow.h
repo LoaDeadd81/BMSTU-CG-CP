@@ -8,6 +8,9 @@
 #include <memory>
 #include <list>
 
+#include <ctime>
+#include <string>
+
 #include "SceneManager.h"
 #include "Commands.h"
 
