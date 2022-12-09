@@ -10,6 +10,7 @@
 
 #include <ctime>
 #include <string>
+#include <chrono>
 
 #include "SceneManager.h"
 #include "Commands.h"
@@ -64,7 +65,7 @@ private:
 private:
     Ui::MainWindow *ui;
     shared_ptr<QGraphicsScene> scene;
-    shared_ptr<QPixmap> pixmap;
+    shared_ptr<QImage> image;
     shared_ptr<BaseRenderer> renderer;
     shared_ptr<BaseDrawer> drawer;
 

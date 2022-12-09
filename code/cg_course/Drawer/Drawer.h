@@ -25,7 +25,7 @@ class QtDrawer : public BaseDrawer
 public:
     QtDrawer() = default;
 
-    QtDrawer(shared_ptr<QPixmap> pixmap);
+    QtDrawer(shared_ptr<QImage> image);
 
     virtual ~QtDrawer() override = default;
 
@@ -34,8 +34,7 @@ public:
     virtual void clear() override;
 
 private:
-    QPainter painter;
-    QPen pen;
+    shared_ptr<QImage> image;
 };
 
 #endif

@@ -83,14 +83,30 @@ void TransformCameraCommand::execute(shared_ptr<Scene> scene)
     scene->Camera()->transform(transform_matrix);
 }
 
-RenderCommand::RenderCommand(shared_ptr<BaseRenderer> renderer) : renderer(renderer)
+RenderCommand::RenderCommand(shared_ptr<BaseRenderer> renderer, size_t thread_number)
+        : renderer(renderer), thread_number(thread_number)
 {
 
 }
 
+void run_thread(shared_ptr<BaseRenderer> renderer, shared_ptr<Scene> scene, int min_x, int max_x)
+{
+    renderer->render(scene, min_x, max_x);
+}
+
 void RenderCommand::execute(shared_ptr<Scene> scene)
 {
-    renderer->render(scene);
+    std::vector<std::thread> threads;
+    int w_step = renderer->width() / thread_number, cur_x = 0;
+    for (int i = 0; i < thread_number; i++)
+    {
+        threads.emplace_back(run_thread, renderer, scene, cur_x, cur_x + w_step);
+        cur_x += w_step;
+    }
+
+    for (auto &th: threads)
+        th.join();
+
 }
 
 //RenderCommand::RenderCommand(shared_ptr<BaseDrawer> drawer, RenderProperties properties)

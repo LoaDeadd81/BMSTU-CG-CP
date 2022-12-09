@@ -1,6 +1,6 @@
 #include "Render.h"
 
-void RayTracingRendered::render(shared_ptr<Scene> scene)
+void RayTracingRendered::render(shared_ptr<Scene> scene, int min_x, int max_x)
 {
     int height = props.s_height, width = props.s_width;
     double aspect_ratio = double(width) / height;
@@ -14,9 +14,9 @@ void RayTracingRendered::render(shared_ptr<Scene> scene)
 
     Color color{0, 0, 0};
 
-    for (int j = 0; j < height; j++)
+    for (int j = 1; j < height; j++)
     {
-        for (int i = 0; i < width; i++)
+        for (int i = min_x; i < max_x; i++)
         {
             auto u = double(i) / (width - 1);
             auto v = double(j) / (height - 1);
@@ -42,14 +42,14 @@ bool RayTracingRendered::emitRay(const shared_ptr<Scene> &scene, const Ray &r, C
     if (!flag)
         return false;
 
-    color = data.color * computeLight(scene, data.p, data.n, -r.direction, (*data.iter)->props());
+    color = data.color * computeLight(scene, data.p, data.n, r.direction, (*data.iter)->props());
 
     if (depth <= 0)
         return true;
 
     if ((*data.iter)->props().reflective > 0)
     {
-        Ray refl_ray(data.p, reflectedRay(-r.direction, data.n));
+        Ray refl_ray(data.p, reflectedRay(r.direction, data.n));
         Color refl_color;
         if (emitRay(scene, refl_ray, refl_color, depth - 1))
             color += (*data.iter)->props().reflective * refl_color;
@@ -57,7 +57,7 @@ bool RayTracingRendered::emitRay(const shared_ptr<Scene> &scene, const Ray &r, C
 
     if ((*data.iter)->props().refraction > 0)
     {
-        Ray refr_ray(data.p, refractedRay(-r.direction, data.n, 1.0 / 1.5));
+        Ray refr_ray(data.p, refractedRay(r.direction, data.n, 1.0 / 1.5));
         Color refr_color;
         if (emitRay(scene, refr_ray, refr_color, depth - 1))
             color += (*data.iter)->props().refraction * refr_color;
@@ -85,11 +85,11 @@ RayTracingRendered::computeLight(const shared_ptr<Scene> &scene, const Point3d &
         double n_dot_l = n & l;
         if (n_dot_l >= 0)
         {
-            Vec3d r = reflectedRay(l, n);
+            Vec3d r = reflectedRay(-l, n);
             r.norm();
 
             res += (*it)->I * n_dot_l * prop.diffuse;
-            res += (*it)->I * mirror_reflection(r, v, prop.shine) * prop.specular;
+            res += (*it)->I * mirror_reflection(r, -v, prop.shine) * prop.specular;
         }
     }
 
@@ -119,23 +119,23 @@ RayTracingRendered::closest_intersection(const shared_ptr<Scene> &scene, const R
     return false;
 }
 
-double RayTracingRendered::mirror_reflection(const Vec3d &r, const Vec3d &v, double s)
+double RayTracingRendered::mirror_reflection(const Vec3d &r, const Vec3d &s, double s_degree)
 {
-    double r_dot_v = r & v;
-    if (r_dot_v > 0)
-        pow(r_dot_v, s);
+    double r_dot_s = r & s;
+    if (r_dot_s > 0)
+        return pow(r_dot_s, s_degree);
     return 0;
 
 }
 
-Vec3d RayTracingRendered::reflectedRay(const Vec3d &l, const Vec3d &n)
+Vec3d RayTracingRendered::reflectedRay(const Vec3d &in, const Vec3d &n)
 {
-    return 2.0 * n * (n & l) - l;
+    return in - 2.0 * (in & n) * n;
 }
 
-Vec3d RayTracingRendered::refractedRay(const Vec3d &l, const Vec3d &n, double mi)
+Vec3d RayTracingRendered::refractedRay(const Vec3d &v, const Vec3d &n, double mi)
 {
-    double cos_teta = l & n, n_coef = (mi * cos_teta - std::sqrt(1 - (mi * mi * (1 - cos_teta * cos_teta))));
-    return mi * (-l) + n_coef * n;
+    double cos_teta = (-v) & n, n_coef = (mi * cos_teta - std::sqrt(1 - (mi * mi * (1 - cos_teta * cos_teta))));
+    return mi * v + n_coef * n;
 }
 

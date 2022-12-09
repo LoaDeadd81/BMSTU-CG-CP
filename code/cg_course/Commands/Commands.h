@@ -1,12 +1,14 @@
 #ifndef CG_COURSE_COMMANDS_H
 #define CG_COURSE_COMMANDS_H
 
-#include <Vec.h>
-#include "Model.h"
-#include "Light.h"
-#include "Scene.h"
+#include <thread>
+
+//#include "Vec.h"
+//#include "Model.h"
+//#include "Light.h"
+//#include "Scene.h"
 #include "Transformation.h"
-#include "Scene.h"
+//#include "Scene.h"
 #include "Render.h"
 
 enum class TransformType
@@ -137,7 +139,7 @@ class RenderCommand : public BaseCommand
 public:
     RenderCommand() = default;
 
-    RenderCommand(shared_ptr<BaseRenderer> renderer);
+    RenderCommand(shared_ptr<BaseRenderer> renderer, size_t thread_number);
 
     virtual ~RenderCommand() override = default;
 
@@ -145,6 +147,7 @@ public:
 
 private:
     shared_ptr<BaseRenderer> renderer;
+    size_t thread_number;
 };
 
 //class RenderCommand : public BaseCommand

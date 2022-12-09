@@ -5,6 +5,7 @@
 #include "Drawer.h"
 #include "Properies.h"
 
+
 #define EPS 1e-6
 
 class BaseRenderer
@@ -20,7 +21,13 @@ public:
     RenderProperties &getProps()
     { return props; };
 
-    virtual void render(shared_ptr<Scene> scene) = 0;
+    virtual void render(shared_ptr<Scene> scene, int min_x, int max_x) = 0;
+
+    int height()
+    { return props.s_height; };
+
+    int width()
+    { return props.s_width; };
 
 protected:
     shared_ptr<BaseDrawer> drawer;
@@ -34,7 +41,7 @@ public:
 
     RayTracingRendered() = default;
 
-    virtual void render(shared_ptr<Scene> scene) override;
+    virtual void render(shared_ptr<Scene> scene, int min_x, int max_x) override;
 
 private:
     bool emitRay(const shared_ptr<Scene> &scene, const Ray &r, Color &color, int depth);
@@ -47,11 +54,11 @@ private:
                                      double t_max = std::numeric_limits<double>::max()
     );
 
-    static double mirror_reflection(const Vec3d &r, const Vec3d &v, double s);
+    static double mirror_reflection(const Vec3d &r, const Vec3d &s, double s_degree);
 
     static Vec3d reflectedRay(const Vec3d &l, const Vec3d &n);
 
-    static Vec3d refractedRay(const Vec3d &l, const Vec3d &n, double mi);
+    static Vec3d refractedRay(const Vec3d &v, const Vec3d &n, double mi);
 
 };
 

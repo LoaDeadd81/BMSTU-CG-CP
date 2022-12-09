@@ -16,11 +16,11 @@ MainWindow::MainWindow(QWidget *parent)
     scene = make_shared<QGraphicsScene>(0, 0, WIDTH, HEIGHT, this);
     ui->GraphicsView->setScene(scene.get());
 
-    pixmap = make_shared<QPixmap>(WIDTH, HEIGHT);
+    image = make_shared<QImage>(WIDTH, HEIGHT, QImage::Format_RGB32);
 
     //todo
     render_props = RenderProperties(WIDTH, HEIGHT, 1, 1, 0.1, 3);
-    drawer = make_shared<QtDrawer>(pixmap);
+    drawer = make_shared<QtDrawer>(image);
     renderer = make_shared<RayTracingRendered>(drawer, render_props);
 }
 
@@ -31,18 +31,29 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_RenderButton_clicked()
 {
-    shared_ptr<BaseCommand> command = make_shared<RenderCommand>(renderer);
 
-    std::clock_t start, end;
+//    int t_max = 20, n = 10;
+//    for (int i = 1; i <= t_max; i++)
+//    {
+//        shared_ptr<BaseCommand> command = make_shared<RenderCommand>(renderer, i);
+//
+//        auto start = chrono::steady_clock::now();
+//        for (int j = 0; j < n; j++)
+//            manager.execute(command);
+//        auto end = chrono::steady_clock::now();
+//
+//        cout << i << " : " << chrono::duration_cast<chrono::milliseconds>(end - start).count() / n << endl;
+//            scene->addPixmap(QPixmap::fromImage(*image));
+//    }
 
-    start = std::clock();
+    shared_ptr<BaseCommand> command = make_shared<RenderCommand>(renderer, 12);
+
+    auto start = chrono::steady_clock::now();
     manager.execute(command);
-    end = std::clock();
+    auto end = chrono::steady_clock::now();
 
-    string res = "time: ";
-    res += to_string(double(end - start) / CLOCKS_PER_SEC);
-
-    ui->label->setText(QString::fromStdString(res));
+    ui->label->setText(
+            QString::fromStdString(to_string(chrono::duration_cast<chrono::milliseconds>(end - start).count())));
 
 //    const int N = 4;
 //    int dir_arr[N][2] = {{-1, 0},
@@ -71,12 +82,16 @@ void MainWindow::on_RenderButton_clicked()
 //        }
 //    }
 
-    scene->addPixmap(*pixmap);
+    scene->addPixmap(QPixmap::fromImage(*image));
 }
 
 
 void MainWindow::on_AddObjectButton_clicked()
 {
+
+//    objl::Loader loader;
+//    loader.LoadFile("cube_new.obj");
+
     //todo rework
     Color red{255, 0, 0}, gren{0, 255, 0}, blue{0, 0, 255}, yellow{255, 255, 0}, black{0, 0, 0}, white{230, 230, 230};
     Point3d p = {0, 1, 0}, p2 = {-5, -5, -20}, p3 = {0, 2, -20}, p4 = {8, 8, -20}, l = {5, 5, -5}, l2 = {-5, -5, -5},
@@ -85,7 +100,7 @@ void MainWindow::on_AddObjectButton_clicked()
     shared_ptr<BaseCommand> com1, com2, com3, com4, com5, com6, com7, com8, com9, com10;
 
     com1 = make_shared<AddModelCommand>(make_shared<Plane>(p, 10, white, ObjectProperties(1, 1, 1, 0, 0)));
-    com2 = make_shared<AddModelCommand>(make_shared<Sphere>(p2, 2, gren, ObjectProperties(1, 1, 1, 0, 0)));
+    com2 = make_shared<AddModelCommand>(make_shared<Sphere>(p2, 2, gren, ObjectProperties(1, 1, 10, 0, 0)));
     com3 = make_shared<AddModelCommand>(make_shared<Sphere>(p3, 2, black, ObjectProperties(1, 1, 1, 1, 0)));
     com4 = make_shared<AddModelCommand>(make_shared<Sphere>(p4, 2, black, ObjectProperties(1, 1, 1, 0, 1)));
     com5 = make_shared<AddLightCommand>(make_shared<Light>(l, 0.5));

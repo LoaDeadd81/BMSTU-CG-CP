@@ -32,6 +32,8 @@ class Sphere : public BaseModel
 public:
     Sphere() = default;
 
+    Sphere(Point3d center, double r);
+
     Sphere(Point3d center, double r, Color color, ObjectProperties props);
 
     virtual ~Sphere() = default;
@@ -39,6 +41,8 @@ public:
     virtual void transform(const Matix4x3d &transform_matrix) override;
 
     virtual bool intersect(const Ray &ray, IntersectionData &data) override;
+
+    bool is_intersect(const Ray &ray);
 
     virtual void setTexture(const string &path) override;
 
@@ -76,6 +80,33 @@ private:
     double a, b, c, d;
     Vec3d normal;
     Point3d point;
+    Color color;
+    ObjectProperties properties;
+};
+
+class PolygonalBoundedModel : public BaseModel
+{
+public:
+    PolygonalBoundedModel() = default;
+
+    PolygonalBoundedModel(const objl::Mesh &mesh, Color color, ObjectProperties props);
+
+    virtual ~PolygonalBoundedModel() = default;
+
+    virtual void transform(const Matix4x3d &transform_matrix) override;
+
+    virtual bool intersect(const Ray &ray, IntersectionData &data) override;
+
+    virtual void setTexture(const string &path) override;
+
+    virtual void setColor(const Color &&clr) override;
+
+    virtual ObjectProperties &props() override;
+
+private:
+    vector<Polygon> polygons;
+    Sphere bounding_sphere;
+
     Color color;
     ObjectProperties properties;
 };
