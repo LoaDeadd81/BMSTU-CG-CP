@@ -17,6 +17,9 @@
 
 // Math.h - STD math Library
 #include <cmath>
+#include <ios>
+
+#include <QString>
 
 // Print progress to console while loading (large models)
 //#define OBJL_CONSOLE_OUTPUT

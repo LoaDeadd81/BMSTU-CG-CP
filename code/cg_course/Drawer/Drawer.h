@@ -15,7 +15,7 @@ public:
 
     virtual ~BaseDrawer() = default;
 
-    virtual void draw_pixel(int x, int y, Color color) = 0;
+    virtual void draw_pixel(int x, int y, Color &color) = 0;
 
     virtual void clear() = 0;
 };
@@ -29,7 +29,7 @@ public:
 
     virtual ~QtDrawer() override = default;
 
-    virtual void draw_pixel(int x, int y, Color color) override;
+    virtual void draw_pixel(int x, int y, Color &color) override;
 
     virtual void clear() override;
 

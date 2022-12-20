@@ -10,6 +10,11 @@ public:
     SceneManager()
     { scene = make_shared<Scene>(); };
 
+    SceneManager(shared_ptr<Camera> &cam)
+    {
+        scene = make_shared<Scene>(cam);
+    };
+
     void execute(shared_ptr<BaseCommand> command)
     { command->execute(scene); };
 

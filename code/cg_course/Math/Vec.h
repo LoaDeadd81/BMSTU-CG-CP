@@ -20,9 +20,11 @@ public:
 
     Vec(std::initializer_list<T> list);
 
+    Vec(QColor &color);
+
     Vec<T, N> &operator=(const Vec<T, N> &other);
 
-    Vec<T, N> &operator=(Vec<T, N> &&other);
+    Vec<T, N> &operator=(Vec<T, N> &&other) noexcept;
 
     Vec<T, N> operator+(const Vec<T, N> &other) const;
 
@@ -60,6 +62,8 @@ public:
 
     operator QColor() const;
 
+    Vec<T, N> &member_mult(const Vec<T, N> &other);
+
 private:
     std::array<T, N> arr;
 };
@@ -67,19 +71,13 @@ private:
 using Vec3d = Vec<double, 3>;
 using Color = Vec<double, 3>;
 using Point3d = Vec<double, 3>;
+using Point4d = Vec<double, 4>;
 using Vec4d = Vec<double, 4>;
 
 template<typename T, std::size_t N>
 Vec<T, N> operator*(const T &n, const Vec<T, N> &other)
 {
     return other * n;
-}
-
-//todo
-template<typename T, std::size_t N>
-T angele(const Vec<T, N> &v1, const Vec<T, N> &v2)
-{
-    return nullptr;
 }
 
 template<typename T, std::size_t N>
@@ -110,6 +108,14 @@ Vec<T, N>::Vec(std::initializer_list<T> list)
 }
 
 template<typename T, std::size_t N>
+Vec<T, N>::Vec(QColor &color)
+{
+    arr[0] = color.red() / 255.0;
+    arr[1] = color.green() / 255.0;
+    arr[2] = color.blue() / 255.0;
+}
+
+template<typename T, std::size_t N>
 Vec<T, N> &Vec<T, N>::operator=(const Vec<T, N> &other)
 {
     arr = other.arr;
@@ -117,7 +123,7 @@ Vec<T, N> &Vec<T, N>::operator=(const Vec<T, N> &other)
 }
 
 template<typename T, std::size_t N>
-Vec<T, N> &Vec<T, N>::operator=(Vec<T, N> &&other)
+Vec<T, N> &Vec<T, N>::operator=(Vec<T, N> &&other) noexcept
 {
     arr = std::move(other.arr);
 
@@ -267,32 +273,25 @@ Vec<T, N>::operator QColor() const
         throw DimensionError(__FILE__, __FUNCTION__, __LINE__,
                              "Can't cast to QColor, vectors of dimension 3 are needed");
 
-    double res[3] = {arr[0], arr[1], arr[2]};
-    bool flag = false;
+    QColor res(min(1.0, arr[0]) * 255.0,
+               min(1.0, arr[1]) * 255.0,
+               min(1.0, arr[2]) * 255.0
+    );
 
-    for (auto &re: res)
-        if (re > 255.0)
-        {
-            flag = true;
-            break;
-        }
+//    QColor res(arr[0] * 255.0, arr[1] * 255.0, arr[2] * 255.0);
+//    QColor res(100, 100, 100);
 
-    if (flag)
-    {
-        double max = 0;
 
-        for (auto &re: res)
-            if (re > max)
-                max = re;
+    return res;
+}
 
-        for (auto &re: res)
-        {
-            re /= max;
-            re *= 255.0;
-        }
-    }
+template<typename T, std::size_t N>
+Vec<T, N> &Vec<T, N>::member_mult(const Vec<T, N> &other)
+{
+    for (int i = 0; i < N; i++)
+        this->arr[i] *= other.arr[i];
 
-    return {int(res[0]), int(res[1]), int(res[2])};
+    return *this;
 }
 
 #endif

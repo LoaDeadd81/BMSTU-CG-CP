@@ -1,0 +1,264 @@
+\chapter{Технологическая часть}
+
+В данном разделе рассмотрены средства реализации, описана структура программы, представлены листинги реализации алгоритма трассировки лучей и продемонстрирован интерфейс программы.
+
+\section{Средства реализации}
+В данной работе для реализации был выбран язык программирования $C++$ ввиду следующих причин:
+\begin{itemize}[label=---]
+	\item наличие большого количества библиотек для разработки приложений;
+	\item возможность создания многопоточных приложений;
+	\item наличие опыта программирования на данном языке.
+\end{itemize}
+
+В качестве среды разработки (IDE) была выбрана среда Clion, поскольку она содержит всю функциональность для удобной разработки ПО и в ней есть поддержка фреймворка Qt.
+
+
+\section{Сведения о модулях программы}
+Программа состоит из следующих	 модулей:
+\begin{itemize}[label=---]
+	\item Command --- модуль, реализующий паттерн <<команда>> для работы со сценой;
+	\item Drawer --- модуль, хранящий <<холст>> и предоставляющий методы для рисования на нём;
+	\item Error --- модуль с классами для обработки исключительных ситуаций;
+	\item Manager --- модуль, хранящий сцену и предоставляет методы для работы с ней;
+	\item Vec --- модуль, реализующий математические вектора;
+	\item Matrix --- модуль, реализующий матрицы;
+	\item Transformation --- модуль предоставляющий функции для получения матриц преобразования;
+	\item GeometryPrimitives --- модуль, реализующий лучи, вершины, полигоны;
+	\item Textures --- модуль, реализующий текстуры;
+	\item Properies --- модуль с классами, хранящими дополнительную информацию для рендера;
+	\item Loader --- модуль, предоставляющий загрузку моделей из файлов;
+	\item Model --- модуль, реализующий объекты сцены;
+	\item Light --- модуль, реализующий источник освещения;
+	\item Camera --- модуль, реализующий камеру;
+	\item Render --- модуль, реализующий алгоритм генерации изображения;
+	\item Scene --- модуль, хранящий объекты сцены и предоставляющий методы для работы с ней;
+	\item MainWindow --- модуль окна приложения;
+	\item main.cpp --- файл, содержащий весь служебный код;
+\end{itemize}
+
+\section{Реализация алгоритмов}
+
+В листингах \ref{lst:trace}--\ref{lst:refract} представлена реализация алгоритма трассировки лучей. Для функции трассировки лучей указаны аргументы $min\_x$ и $max\_x$, которые обозначают границу блока, который обрабатывает и отрисовывает данная функция. При многопоточном исполнении эти аргументы будут обозначать область ответственности каждого вспомогательного потока.
+
+\newpage
+
+\begin{center}
+    \captionsetup{justification=raggedright,singlelinecheck=off}
+    \begin{lstlisting}[label=lst:trace,caption=Трассировка лучей]
+void RayTracingRendered::render(shared_ptr<Scene> scene, int min_x, int max_x)
+{
+	int height = props.s_height, width = props.s_width;
+	double aspect_ratio = double(width) / height;
+	double viewport_height = props.v_height;
+	double viewport_width = aspect_ratio * viewport_height;
+	double focal_length = props.f_len;
+	Point3d origin = scene->cam()->origin;
+	Vec3d right = scene->cam()->dir ^ scene->cam()->up;
+	Vec3d dir_f = scene->cam()->dir * focal_length,
+	v_2 = scene->cam()->up * (viewport_height / 2.0),
+	h_2 = right * (viewport_width / 2.0);
+	Point3d lb_corner = origin + dir_f - v_2 - h_2,
+	rb_corner = origin + dir_f - v_2 + h_2,
+	lt_corner = origin + dir_f + v_2 - h_2;
+	Vec3d horizontal = rb_corner - lb_corner, vertical = lt_corner - lb_corner;
+	Color color{0, 0, 0};
+	double du = 1.0 / (width - 1), dv = 1.0 / (height - 1);
+	double min_u = double(min_x) / (width - 1), cu = min_u, cv = dv;
+	for (int j = 1; j < height; j++){
+		for (int i = min_x; i < max_x; i++){
+			color = {0, 0, 0};
+			Vec3d dir = lb_corner + cu * horizontal + cv * vertical - origin;
+			dir.norm();
+			Ray r(origin, dir);
+			
+			if (emitRay(scene, r, color, props.max_depth))
+				drawer->draw_pixel(i, height - j, color);
+			
+			cu += du;
+		}
+		cu = min_u;
+		cv += dv;
+	}
+}
+\end{lstlisting}
+\end{center}
+
+\newpage
+
+\begin{center}
+	\captionsetup{justification=raggedright,singlelinecheck=off}
+	\begin{lstlisting}[label=lst:emit1,caption=Расчёт освещения для луча (начало)]
+bool RayTracingRendered::emitRay(const shared_ptr<Scene> &scene, const Ray &r, Color &color, int depth)
+{
+	IntersectionData data;
+	
+	if (!closest_intersection(scene, r, data))
+	return false;
+	Color ambient, diffuse, specular, reflect, refract;
+	color = {0, 0, 0};
+	
+	ambient = props.ambient * data.color;
+	
+	
+	for (auto it = scene->LightsBegin(); it != scene->LightsEnd(); it++)
+	{
+		Vec3d l = (*it)->origin - data.p;
+		
+		if (closest_intersection(scene, {data.p, l}, data, EPS, 1))
+		continue;
+		l.norm();
+		
+		double n_dot_l = data.n & l;
+		if (n_dot_l >= 0)
+		{
+			Vec3d refl = reflectedRay(-l, data.n);
+			refl.norm();
+			
+			if ((*data.iter)->props().diffuse > 0)
+			diffuse += (*it)->comp_color * n_dot_l * (*data.iter)->props().diffuse;
+			if ((*data.iter)->props().specular > 0)
+			specular += (*it)->comp_color * mirror_reflection(refl, -r.direction, (*data.iter)->props().shine) *
+			(*data.iter)->props().specular;
+		}
+	}
+	
+	diffuse.member_mult(data.color);
+	\end{lstlisting}
+\end{center}
+
+
+\begin{center}
+	\captionsetup{justification=raggedright,singlelinecheck=off}
+	\begin{lstlisting}[label=lst:emit2,caption=Расчёт освещения для луча (окончание)]
+	
+	if (depth <= 0)
+	return true;
+	
+	if ((*data.iter)->props().reflective > 0)
+	{
+		Ray refl_ray(data.p, reflectedRay(r.direction, data.n));
+		Color refl_color;
+		if (emitRay(scene, refl_ray, refl_color, depth - 1))
+		reflect = (*data.iter)->props().reflective * refl_color;
+	}
+	
+	if ((*data.iter)->props().refraction > 0)
+	{
+		Ray refr_ray(data.p, refractedRay(r.direction, data.n, props.mi_world / data.iter->get()->props().mi));
+		Color refr_color;
+		if (emitRay(scene, refr_ray, refr_color, depth - 1))
+		refract = (*data.iter)->props().refraction * refr_color;
+	}
+	
+	color = ambient + diffuse + specular + reflect + refract;
+	
+	return true;
+}
+	\end{lstlisting}
+\end{center}
+
+\begin{center}
+	\captionsetup{justification=raggedright,singlelinecheck=off}
+	\begin{lstlisting}[label=lst:parallel,caption=Распараллеливание трассировки лучей]
+		
+void RenderCommand::execute(shared_ptr<Scene> scene)
+{
+	std::vector<std::thread> threads;
+	int w_step = renderer->width() / thread_number, cur_x = 0;
+	for (int i = 0; i < thread_number; i++){
+		threads.emplace_back(run_thread, renderer, scene, cur_x, cur_x + w_step);
+		cur_x += w_step;
+	}
+	for (auto &th: threads)th.join();
+}
+\end{lstlisting}
+\end{center}
+
+\newpage
+
+\begin{center}
+    \captionsetup{justification=raggedright,singlelinecheck=off}
+    \begin{lstlisting}[label=lst:intersec,caption=Поиск ближайшего пересечения луча с объктом сцены]
+bool
+RayTracingRendered::closest_intersection(const shared_ptr<Scene> &scene, const Ray &r, IntersectionData &data,
+double t_min,
+double t_max)
+{
+	IntersectionData cur_data;
+	data.t = t_max;
+	bool flag = false;
+	
+	for (auto it = scene->ModelsBegin(); it != scene->ModelsEnd(); it++)
+	if ((*it)->intersect(r, cur_data) && cur_data.t < data.t && cur_data.t > t_min)
+	{
+		flag = true;
+		data = std::move(cur_data);
+		data.iter = it;
+	}
+	
+	
+	return flag;
+}
+\end{lstlisting}
+\end{center}
+
+
+\begin{center}
+    \captionsetup{justification=raggedright,singlelinecheck=off}
+    \begin{lstlisting}[label=lst:reflect,caption=Расчёт отражённого луча]
+Vec3d RayTracingRendered::reflectedRay(const Vec3d &in, const Vec3d &n)
+{
+	return in - 2.0 * (in & n) * n;
+}
+\end{lstlisting}
+\end{center}
+
+\newpage
+
+\begin{center}
+	\captionsetup{justification=raggedright,singlelinecheck=off}
+	\begin{lstlisting}[label=lst:refract,caption=Расчёт преломлённого луча]
+Vec3d RayTracingRendered::refractedRay(const Vec3d &v, const Vec3d &n, double mi)
+{
+	double cos_teta = (-v) & n, n_coef = (mi * cos_teta - std::sqrt(1 - (mi * mi * (1 - cos_teta * cos_teta))));
+	return mi * v + n_coef * n;
+}
+	\end{lstlisting}
+\end{center}
+
+\section{Описание интерфейса}
+
+На рисунке \ref{img:main} представлен оконный интерфейс программы. Он предоставляет возможность добавить, удалить и изменить объекты сцены. Также можно изменять настройки окружающей среды и рендера и просматривать изображение, полученное в результате работы.
+
+\imgHeight{260pt}{main}{Интерфейс программы}
+
+Для добавления модели необходимо выбрать в выпадающем меню пункт <<Полигональная модель>> и нажать кнопку <<Добавить>>. Появится диалоговое окно для выбора файла, из которого будет импортирована модель, как на рисунке \ref{img:import}. Модель добавиться в список объектов. Аналогично добавляются другие модели и источники света.
+
+\imgHeight{260pt}{import}{Диалоговое окно для выбора модели}
+
+Для получения изображения необходимо нажать кнопку <<Рендер>> и в окне просмотра появится результат как на рисунке \ref{img:render}.
+
+\imgHeight{260pt}{render}{Результат работы программы}
+
+В боковой панели можно выбрать один или несколько объектов и выполнить их преобразование или изменить оптические характеристики. Также есть возможность выбора цвета модели. При изменении цвета появляется диалоговое окно, как на рисунке \ref{img:color}. Выбранный цвет появится в окне предпросмотра над кнопкой <<Изменить>>.
+
+
+\imgHeight{260pt}{color}{Диалоговое окно для выбора цвета}
+
+Для наложения текстуры необходимо нажать на кнопку <<Изменить>> во вкладке <<Текстура>> и в диалоговом окне выбрать графическое изображение. Выбранная текстура появится в окне предпросмотра над кнопкой <<Изменить>>, как на рисунке \ref{img:texrender}.
+
+\clearpage
+
+\imgHeight{260pt}{texrender}{Рендер объекта с наложенной текстурой}
+
+Аналогичным образом можно работать с источниками освещения и камерой. Дополнительные настройки окружающей среды и рендера находятся во вкладке <<Мир>>, как на рисунке \ref{img:settings}.
+При клике на любой объект сцены боковая панель заполняется его характеристиками.
+
+\imgHeight{260pt}{settings}{Дополнительные настройки}
+
+\clearpage
+
+\section*{Вывод}
+
+Было приведено описание структуры программы, выбраны средства реализации ПО, приведены листинги кода, и продемонстрирован интерфейс
+программы.

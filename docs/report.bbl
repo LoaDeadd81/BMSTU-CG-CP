@@ -1,0 +1,48 @@
+\begin{thebibliography}{1}
+\def\selectlanguageifdefined#1{
+\expandafter\ifx\csname date#1\endcsname\relax
+\else\language\csname l@#1\endcsname\fi}
+\ifx\undefined\url\def\url#1{{\small #1}}\else\fi
+\ifx\undefined\BibUrl\def\BibUrl#1{\url{#1}}\else\fi
+\ifx\undefined\BibAnnote\long\def\BibAnnote#1{(#1)}\else\fi
+\ifx\undefined\BibEmph\def\BibEmph#1{\emph{#1}}\else\fi
+
+\bibitem{data}
+\selectlanguageifdefined{russian}
+Методы представления дискретных данных
+  [Электронный ресурс].
+\newblock Режим доступа:
+  \url{https://www.graphicon.ru/oldgr/ru/library/multires_rep/index.html}
+  (дата обращения: 21.09.22).
+
+\bibitem{rodgers}
+\selectlanguageifdefined{russian}
+Роджерс Д. Алгоритмические основы машинной
+  графики. — М.: Мир, 1989. — 512 с.
+
+\bibitem{alg}
+\selectlanguageifdefined{russian}
+Гамбетта Г. Компьютерная графика.
+  Рейтрейсинг и растеризация. — СПб.: Питер,
+  2022. — 224 с.
+
+\bibitem{light}
+\selectlanguageifdefined{russian}
+Простые модели освещения.
+\newblock Режим доступа: \url{http://grafika.me/node/344} (дата
+  обращения: 27.12.2022).
+
+\bibitem{porev}
+\selectlanguageifdefined{russian}
+Поре в В. Н. Компьютерная графика. — СПб.:
+  БХВ-Петербург, 2002. -- 432 с. : ил.
+
+\bibitem{intel}
+\selectlanguageifdefined{russian}
+Процессор Intel® Core™ i5-7300HQ [Электронный
+  ресурс].
+\newblock Режим доступа:
+  \url{https://ark.intel.com/content/www/ru/ru/ark/products/97456/intel-core-i5-7300hq-processor-6m-cache-up-to-3-50-ghz.html}
+  (дата обращения: 23.10.2022).
+
+\end{thebibliography}

@@ -1,0 +1,37 @@
+\babel@toc {russian}{}\relax 
+\contentsline {chapter}{Введение}{3}{chapter*.2}%
+\contentsline {chapter}{\numberline {1}Аналитический раздел}{4}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Описание трёхмерного объекта}{4}{section.1.1}%
+\contentsline {subsection}{\numberline {1.1.1}Геометрические примитивы}{4}{subsection.1.1.1}%
+\contentsline {subsection}{\numberline {1.1.2}Воксельная модель}{4}{subsection.1.1.2}%
+\contentsline {subsection}{\numberline {1.1.3}Полигональная модель}{4}{subsection.1.1.3}%
+\contentsline {section}{\numberline {1.2}Алгоритм построения трёхмерного изображения}{5}{section.1.2}%
+\contentsline {subsection}{\numberline {1.2.1}Алгоритм Z-буфера}{5}{subsection.1.2.1}%
+\contentsline {subsection}{\numberline {1.2.2}Алгоритм обратной трассировки лучей}{6}{subsection.1.2.2}%
+\contentsline {section}{\numberline {1.3}Модель освещения трёхмерных объектов}{7}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Модель Ламберта}{7}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}Модель Фонга}{8}{subsection.1.3.2}%
+\contentsline {subsection}{\numberline {1.3.3}Модель Уиттеда}{9}{subsection.1.3.3}%
+\contentsline {chapter}{\numberline {2}Конструкторская часть}{11}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Описание используемых типов данных}{11}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Разработка алгоритма обратной трассировки лучей}{11}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Алгоритм обратной трассировки лучей}{11}{subsection.2.2.1}%
+\contentsline {subsection}{\numberline {2.2.2}Нахождение пересечения луча с полигоном}{13}{subsection.2.2.2}%
+\contentsline {subsection}{\numberline {2.2.3}Нахождение пересечения с объемлющей оболочкой}{15}{subsection.2.2.3}%
+\contentsline {subsection}{\numberline {2.2.4}Оптимизация алгоритма трассировки лучей}{16}{subsection.2.2.4}%
+\contentsline {section}{\numberline {2.3}Реализация модели освещения Уиттеда}{16}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Нахождение отражённого луча}{16}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Нахождение преломлённого луча}{17}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Общая реализация модели освещения Уиттеда}{18}{subsection.2.3.3}%
+\contentsline {chapter}{\numberline {3}Технологическая часть}{19}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Средства реализации}{19}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Сведения о модулях программы}{19}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Реализация алгоритмов}{20}{section.3.3}%
+\contentsline {section}{\numberline {3.4}Описание интерфейса}{25}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Экспериментальная часть}{30}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Технические характеристики}{30}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Демонстрация работы программы}{30}{section.4.2}%
+\contentsline {section}{\numberline {4.3}Описание эксперимента}{32}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Вывод}{34}{section.4.4}%
+\contentsline {chapter}{Заключение}{35}{chapter*.18}%
+\contentsline {chapter}{Список используемых источников}{36}{chapter*.18}%

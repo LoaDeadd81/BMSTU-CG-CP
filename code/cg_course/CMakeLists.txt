@@ -10,6 +10,8 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
@@ -19,7 +21,7 @@ set(PROJECT_SOURCES
         UI/mainwindow.cpp
         UI/mainwindow.h
         UI/mainwindow.ui
-        Math/Matrix.h Math/Vec.h Errors/Errors.cpp Errors/Errors.h Math/Transformation.cpp Math/Transformation.h Math/GeometryPrimitives.cpp Math/GeometryPrimitives.h Objects/Model.cpp Objects/Model.h Objects/Camera.cpp Objects/Camera.h Objects/Light.cpp Objects/Light.h Manager/SceneManager.h Scene/Scene.cpp Scene/Scene.h Commands/Commands.cpp Commands/Commands.h Objects/Properies.h Drawer/Drawer.cpp Drawer/Drawer.h Render/Render.cpp Render/Render.h Objects/OBJ_Loader.h Objects/loader.cpp)
+        Math/Matrix.h Math/Vec.h Errors/Errors.cpp Errors/Errors.h Math/Transformation.cpp Math/Transformation.h Math/GeometryPrimitives.cpp Math/GeometryPrimitives.h Objects/Model.cpp Objects/Model.h Objects/Camera.cpp Objects/Camera.h Objects/Light.cpp Objects/Light.h Manager/SceneManager.h Scene/Scene.cpp Scene/Scene.h Commands/Commands.cpp Commands/Commands.h Objects/Properies.h Drawer/Drawer.cpp Drawer/Drawer.h Render/Render.cpp Render/Render.h Objects/OBJ_Loader.h Objects/loader.cpp Objects/Textures.cpp Objects/Textures.h)
 
 include_directories(Math Errors UI Objects Scene Manager Commands Manager Drawer Render)
 

@@ -5,7 +5,7 @@
 #include <utility>
 #include <array>
 
-//todo add template container
+
 template<typename T, std::size_t N, std::size_t M>
 class Matrix
 {
@@ -44,6 +44,7 @@ private:
 };
 
 using Matix4x3d = Matrix<double, 4, 3>;
+using Matix4x4d = Matrix<double, 4, 4>;
 template<std::size_t M>
 using RowMatrixd = Matrix<double, 1, M>;
 template<std::size_t N>

@@ -324,7 +324,7 @@ bool Loader::LoadFile(std::string Path)
     std::ifstream file(Path);
 
     if (!file.is_open())
-        return false;
+        throw std::ios::failure("No such file");
 
     LoadedMeshes.clear();
     LoadedVertices.clear();
@@ -425,12 +425,16 @@ bool Loader::LoadFile(std::string Path)
         if (algorithm::firstToken(curline) == "v")
         {
             std::vector<std::string> spos;
+            std::vector<QString> qsnor(3);
             Vector3 vpos;
             algorithm::split(algorithm::tail(curline), spos, " ");
 
-            vpos.X = std::stof(spos[0]);
-            vpos.Y = std::stof(spos[1]);
-            vpos.Z = std::stof(spos[2]);
+            for (int i = 0; i < 3; i++)
+                qsnor[i] = QString::fromStdString(spos[i]);
+
+            vpos.X = qsnor[0].toDouble();
+            vpos.Y = qsnor[1].toDouble();
+            vpos.Z = qsnor[2].toDouble();
 
             Positions.push_back(vpos);
         }
@@ -438,11 +442,15 @@ bool Loader::LoadFile(std::string Path)
         if (algorithm::firstToken(curline) == "vt")
         {
             std::vector<std::string> stex;
+            std::vector<QString> qsnor(2);
             Vector2 vtex;
             algorithm::split(algorithm::tail(curline), stex, " ");
 
-            vtex.X = std::stof(stex[0]);
-            vtex.Y = std::stof(stex[1]);
+            for (int i = 0; i < 2; i++)
+                qsnor[i] = QString::fromStdString(stex[i]);
+
+            vtex.X = qsnor[0].toDouble();
+            vtex.Y = qsnor[1].toDouble();
 
             TCoords.push_back(vtex);
         }
@@ -450,12 +458,16 @@ bool Loader::LoadFile(std::string Path)
         if (algorithm::firstToken(curline) == "vn")
         {
             std::vector<std::string> snor;
+            std::vector<QString> qsnor(3);
             Vector3 vnor;
             algorithm::split(algorithm::tail(curline), snor, " ");
 
-            vnor.X = std::stof(snor[0]);
-            vnor.Y = std::stof(snor[1]);
-            vnor.Z = std::stof(snor[2]);
+            for (int i = 0; i < 3; i++)
+                qsnor[i] = QString::fromStdString(snor[i]);
+
+            vnor.X = qsnor[0].toDouble();
+            vnor.Y = qsnor[1].toDouble();
+            vnor.Z = qsnor[2].toDouble();
 
             Normals.push_back(vnor);
         }

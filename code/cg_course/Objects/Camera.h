@@ -2,11 +2,26 @@
 #define CG_COURSE_CAMERA_H
 
 #include "Matrix.h"
+#include "Vec.h"
+#include "Transformation.h"
 
-class BaseCamera
+class Camera
 {
 public:
-    virtual void transform(const Matix4x3d &transform_matrix) = 0;
+    Camera() = default;
+
+    Camera(Point3d &origin, Vec3d &dir, Vec3d &up);
+
+    void move(double dx, double dy, double dz);
+
+    void rotate(double dx, double dy, double dz);
+
+    void scale(double dx, double dy, double dz);
+
+public:
+    Point3d origin;
+    Vec3d dir;
+    Vec3d up;
 };
 
 #endif

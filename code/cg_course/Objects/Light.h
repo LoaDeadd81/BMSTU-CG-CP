@@ -9,13 +9,23 @@ class Light
 public:
     Light() = default;
 
-    Light(Vec3d origin, double I);
+    Light(const Vec3d &origin, double I, const Color &color);
 
-    virtual void transform(const Matix4x3d &transform_matrix);
+    void move(double dx, double dy, double dz);
+
+    void rotate(double dx, double dy, double dz);
+
+    void scale(double dx, double dy, double dz);
+
+    void setColor(const Color &color);
+
+    void setI(double i);
 
 public:
     Vec3d origin;
     double I;
+    Color color;
+    Color comp_color;
 };
 
 #endif

@@ -8,41 +8,75 @@ void RayTracingRendered::render(shared_ptr<Scene> scene, int min_x, int max_x)
     double viewport_width = aspect_ratio * viewport_height;
     double focal_length = props.f_len;
 
-    Point3d origin = {0, 0, 0};
-    Vec3d horizontal = {viewport_width, 0, 0}, vertical = {0, viewport_height, 0};
-    Point3d lower_left_corner = origin - horizontal / 2 - vertical / 2 - Point3d{0, 0, focal_length};
+    Point3d origin = scene->cam()->origin;
+    Vec3d right = scene->cam()->dir ^ scene->cam()->up;
+    Vec3d dir_f = scene->cam()->dir * focal_length,
+            v_2 = scene->cam()->up * (viewport_height / 2.0),
+            h_2 = right * (viewport_width / 2.0);
+    Point3d lb_corner = origin + dir_f - v_2 - h_2,
+            rb_corner = origin + dir_f - v_2 + h_2,
+            lt_corner = origin + dir_f + v_2 - h_2;
+    Vec3d horizontal = rb_corner - lb_corner, vertical = lt_corner - lb_corner;
 
     Color color{0, 0, 0};
-
+    double du = 1.0 / (width - 1), dv = 1.0 / (height - 1);
+    double min_u = double(min_x) / (width - 1), cu = min_u, cv = dv;
     for (int j = 1; j < height; j++)
     {
         for (int i = min_x; i < max_x; i++)
         {
+            color = {0, 0, 0};
             auto u = double(i) / (width - 1);
             auto v = double(j) / (height - 1);
-            Vec3d dir = lower_left_corner + u * horizontal + v * vertical - origin;
+            Vec3d dir = lb_corner + u * horizontal + v * vertical - origin;
             dir.norm();
             Ray r(origin, dir);
 
-            bool flag = emitRay(scene, r, color, props.max_depth);
-
-            if (flag)
+            if (emitRay(scene, r, color, props.max_depth))
                 drawer->draw_pixel(i, height - j, color);
+
+            cu += du;
         }
+        cu = min_u;
+        cv += dv;
     }
 }
 
 bool RayTracingRendered::emitRay(const shared_ptr<Scene> &scene, const Ray &r, Color &color, int depth)
 {
-    IntersectionData data;
+    IntersectionData data, tmp_data;
+
+    if (!closest_intersection(scene, r, data))
+        return false;
+    Color ambient, diffuse, specular, reflect, refract;
     color = {0, 0, 0};
 
-    bool flag = closest_intersection(scene, r, data);
+    ambient = props.ambient * data.color;
 
-    if (!flag)
-        return false;
 
-    color = data.color * computeLight(scene, data.p, data.n, r.direction, (*data.iter)->props());
+    for (auto it = scene->LightsBegin(); it != scene->LightsEnd(); it++)
+    {
+        Vec3d l = (*it)->origin - data.p;
+
+        if (closest_intersection(scene, {data.p, l}, tmp_data, EPS, 1))
+            continue;
+        l.norm();
+
+        double n_dot_l = data.n & l;
+        if (n_dot_l >= 0)
+        {
+            Vec3d refl = reflectedRay(-l, data.n);
+            refl.norm();
+
+            if ((*data.iter)->props().diffuse > 0)
+                diffuse += (*it)->comp_color * n_dot_l * (*data.iter)->props().diffuse;
+            if ((*data.iter)->props().specular > 0)
+                specular += (*it)->comp_color * mirror_reflection(refl, -r.direction, (*data.iter)->props().shine) *
+                            (*data.iter)->props().specular;
+        }
+    }
+
+    diffuse.member_mult(data.color);
 
     if (depth <= 0)
         return true;
@@ -52,48 +86,20 @@ bool RayTracingRendered::emitRay(const shared_ptr<Scene> &scene, const Ray &r, C
         Ray refl_ray(data.p, reflectedRay(r.direction, data.n));
         Color refl_color;
         if (emitRay(scene, refl_ray, refl_color, depth - 1))
-            color += (*data.iter)->props().reflective * refl_color;
+            reflect = (*data.iter)->props().reflective * refl_color;
     }
 
     if ((*data.iter)->props().refraction > 0)
     {
-        Ray refr_ray(data.p, refractedRay(r.direction, data.n, 1.0 / 1.5));
+        Ray refr_ray(data.p, refractedRay(r.direction, data.n, props.mi_world / data.iter->get()->props().mi));
         Color refr_color;
         if (emitRay(scene, refr_ray, refr_color, depth - 1))
-            color += (*data.iter)->props().refraction * refr_color;
+            refract = (*data.iter)->props().refraction * refr_color;
     }
+
+    color = ambient + diffuse + specular + reflect + refract;
+
     return true;
-}
-
-double
-RayTracingRendered::computeLight(const shared_ptr<Scene> &scene, const Point3d &p, const Vec3d &n, const Vec3d &v,
-                                 const ObjectProperties &prop)
-{
-    double res = props.ambient;
-
-    IntersectionData data;
-
-    for (auto it = scene->LightsBegin(); it != scene->LightsEnd(); it++)
-    {
-        Vec3d l = (*it)->origin - p;
-
-        bool is_light = closest_intersection(scene, {p, l}, data, EPS, 1);
-        if (is_light)
-            continue;
-        l.norm();
-
-        double n_dot_l = n & l;
-        if (n_dot_l >= 0)
-        {
-            Vec3d r = reflectedRay(-l, n);
-            r.norm();
-
-            res += (*it)->I * n_dot_l * prop.diffuse;
-            res += (*it)->I * mirror_reflection(r, -v, prop.shine) * prop.specular;
-        }
-    }
-
-    return res;
 }
 
 bool
@@ -102,21 +108,19 @@ RayTracingRendered::closest_intersection(const shared_ptr<Scene> &scene, const R
                                          double t_max)
 {
     IntersectionData cur_data;
-    data.t = std::numeric_limits<double>::max();
+    data.t = t_max;
     bool flag = false;
 
     for (auto it = scene->ModelsBegin(); it != scene->ModelsEnd(); it++)
-        if ((*it)->intersect(r, cur_data) && cur_data.t < data.t && cur_data.t > EPS)
+        if ((*it)->intersect(r, cur_data) && cur_data.t < data.t && cur_data.t > t_min)
         {
             flag = true;
-            data = cur_data;
+            data = std::move(cur_data);
             data.iter = it;
         }
 
-    if (flag)
-        return t_min <= data.t && data.t <= t_max;
 
-    return false;
+    return flag;
 }
 
 double RayTracingRendered::mirror_reflection(const Vec3d &r, const Vec3d &s, double s_degree)

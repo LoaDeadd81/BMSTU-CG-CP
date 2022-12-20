@@ -1,13 +1,27 @@
 #include "Commands.h"
 
-Matix4x3d getTransMatrix(Vec3d data, TransformType type)
+void transform(Vec3d &data, TransformType type, Scene::ModelIter iter)
 {
     if (type == TransformType::MOVE)
-        return getMoveMatrix(data);
+        iter->get()->move(data[0], data[1], data[2]);
     else if (type == TransformType::ROTATE)
-        return getRotateMatrix(data);
+        iter->get()->rotate(data[0], data[1], data[2]);
     else
-        return getScaleMatrix(data);
+        iter->get()->scale(data[0], data[1], data[2]);
+}
+
+void transform(Vec3d &data, TransformType type, Scene::LightIter iter)
+{
+    if (type == TransformType::MOVE)
+        iter->get()->move(data[0], data[1], data[2]);
+}
+
+void transform(Vec3d &data, TransformType type, shared_ptr<Camera> cam)
+{
+    if (type == TransformType::MOVE)
+        cam->move(data[0], data[1], data[2]);
+    else if (type == TransformType::ROTATE)
+        cam->rotate(data[0], data[1], data[2]);
 }
 
 AddModelCommand::AddModelCommand(shared_ptr<BaseModel> model) : model(model)
@@ -16,7 +30,7 @@ AddModelCommand::AddModelCommand(shared_ptr<BaseModel> model) : model(model)
 
 void AddModelCommand::execute(shared_ptr<Scene> scene)
 {
-    scene->add(model);
+    m_iter = scene->add(model);
 }
 
 AddLightCommand::AddLightCommand(shared_ptr<Light> light) : light(light)
@@ -26,61 +40,57 @@ AddLightCommand::AddLightCommand(shared_ptr<Light> light) : light(light)
 
 void AddLightCommand::execute(shared_ptr<Scene> scene)
 {
-    scene->add(light);
+    l_iter = scene->add(light);
 }
 
-DelModelCommand::DelModelCommand(size_t i) : index(i)
+DelModelCommand::DelModelCommand(Scene::ModelIter iter) : iter(iter)
 {
 
 }
 
 void DelModelCommand::execute(shared_ptr<Scene> scene)
 {
-    auto it = scene->ModelsBegin();
-    scene->remove(it + index);
+    scene->remove(iter);
 }
 
-DelLightCommand::DelLightCommand(size_t i) : index(i)
+DelLightCommand::DelLightCommand(Scene::LightIter iter) : iter(iter)
 {
 
 }
 
 void DelLightCommand::execute(shared_ptr<Scene> scene)
 {
-    auto it = scene->LightsBegin();
-    scene->remove(it + index);
+    scene->remove(iter);
 }
 
-TransformModelCommand::TransformModelCommand(Vec3d data, TransformType type, size_t i) : index(i)
+TransformModelCommand::TransformModelCommand(Vec3d &data, TransformType type, Scene::ModelIter iter)
+        : iter(iter), data(data), type(type)
 {
-    transform_matrix = getTransMatrix(data, type);
 }
 
 void TransformModelCommand::execute(shared_ptr<Scene> scene)
 {
-    auto it = scene->ModelsBegin() + index;
-    (*it)->transform(transform_matrix);
+    transform(data, type, iter);
 }
 
-TransformLightCommand::TransformLightCommand(Vec3d data, TransformType type, size_t i) : index(i)
+TransformLightCommand::TransformLightCommand(Vec3d &data, TransformType type, Scene::LightIter iter)
+        : iter(iter), data(data), type(type)
 {
-    transform_matrix = getTransMatrix(data, type);
 }
 
 void TransformLightCommand::execute(shared_ptr<Scene> scene)
 {
-    auto it = scene->LightsBegin() + index;
-    (*it)->transform(transform_matrix);
+    transform(data, type, iter);
 }
 
 TransformCameraCommand::TransformCameraCommand(Vec3d data, TransformType type)
+        : data(data), type(type)
 {
-    transform_matrix = getTransMatrix(data, type);
 }
 
 void TransformCameraCommand::execute(shared_ptr<Scene> scene)
 {
-    scene->Camera()->transform(transform_matrix);
+    transform(data, type, scene->cam());
 }
 
 RenderCommand::RenderCommand(shared_ptr<BaseRenderer> renderer, size_t thread_number)
@@ -106,7 +116,6 @@ void RenderCommand::execute(shared_ptr<Scene> scene)
 
     for (auto &th: threads)
         th.join();
-
 }
 
 //RenderCommand::RenderCommand(shared_ptr<BaseDrawer> drawer, RenderProperties properties)
@@ -211,13 +220,12 @@ void RenderCommand::execute(shared_ptr<Scene> scene)
 //    {
 //        Vec3d l = (*it)->origin - p;
 //
-//        //todo баг когда в источник света за объектом (вроде поправил)
 //        bool is_light = closest_intersection(scene, {p, l}, data, EPS, 1);
 //        if (is_light)
 //            continue;
 //
 //        res += diffuse_reflection(it, l, p, n);
-//        res += mirror_reflection(it, l, p, n, v, prop.shine); //todo светится с обратной стороны от источника
+//        res += mirror_reflection(it, l, p, n, v, prop.shine)
 //    }
 //
 //    return res;

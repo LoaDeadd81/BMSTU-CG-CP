@@ -4,21 +4,29 @@
 #include "Model.h"
 #include "Light.h"
 #include "Camera.h"
-//#include <vector>
+#include <list>
 
 class Scene
 {
 public:
-    using ModelIter = std::vector<shared_ptr<BaseModel>>::iterator;
-    using LightIter = std::vector<shared_ptr<Light>>::iterator;
+    using ModelIter = std::list<shared_ptr<BaseModel>>::iterator;
+    using LightIter = std::list<shared_ptr<Light>>::iterator;
 
-    void add(const shared_ptr<BaseModel> model);
+    Scene() = default;
 
-    void add(const shared_ptr<Light> light);
+    Scene(shared_ptr<Camera> &cam);
+
+    ModelIter add(shared_ptr<BaseModel> &model);
+
+    LightIter add(shared_ptr<Light> &light);
 
     void remove(ModelIter iter);
 
     void remove(LightIter iter);
+
+    void setColor(ModelIter iter, const Color &color);
+
+    void setColor(LightIter iter, const Color &color);
 
     ModelIter ModelsBegin();
 
@@ -28,12 +36,12 @@ public:
 
     LightIter LightsEnd();
 
-    shared_ptr<BaseCamera> Camera();
+    shared_ptr<Camera> cam();
 
 private:
-    std::vector<shared_ptr<BaseModel>> model_list;
-    std::vector<shared_ptr<Light>> light_list;
-    shared_ptr<BaseCamera> camera;
+    std::list<shared_ptr<BaseModel>> model_list;
+    std::list<shared_ptr<Light>> light_list;
+    shared_ptr<Camera> camera;
 };
 
 

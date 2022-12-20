@@ -26,7 +26,21 @@ public:
     virtual void execute(shared_ptr<Scene> scene) = 0;
 };
 
-class AddModelCommand : public BaseCommand
+class AddCommand : public BaseCommand
+{
+public:
+    AddCommand() = default;
+
+    virtual ~AddCommand() override = default;
+
+    virtual void execute(shared_ptr<Scene> scene) = 0;
+
+public:
+    Scene::ModelIter m_iter;
+    Scene::LightIter l_iter;
+};
+
+class AddModelCommand : public AddCommand
 {
 public:
     AddModelCommand() = default;
@@ -41,7 +55,7 @@ private:
     shared_ptr<BaseModel> model;
 };
 
-class AddLightCommand : public BaseCommand
+class AddLightCommand : public AddCommand
 {
 public:
     AddLightCommand() = default;
@@ -61,14 +75,14 @@ class DelModelCommand : public BaseCommand
 public:
     DelModelCommand() = default;
 
-    DelModelCommand(size_t i);
+    DelModelCommand(Scene::ModelIter iter);
 
     virtual ~DelModelCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    size_t index;
+    Scene::ModelIter iter;
 };
 
 class DelLightCommand : public BaseCommand
@@ -76,14 +90,14 @@ class DelLightCommand : public BaseCommand
 public:
     DelLightCommand() = default;
 
-    DelLightCommand(size_t i);
+    DelLightCommand(Scene::LightIter iter);
 
     virtual ~DelLightCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    size_t index;
+    Scene::LightIter iter;
 };
 
 class TransformModelCommand : public BaseCommand
@@ -91,15 +105,16 @@ class TransformModelCommand : public BaseCommand
 public:
     TransformModelCommand() = default;
 
-    TransformModelCommand(Vec3d data, TransformType type, size_t i = 0);
+    TransformModelCommand(Vec3d &data, TransformType type, Scene::ModelIter iter);
 
     virtual ~TransformModelCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    size_t index;
-    Matix4x3d transform_matrix;
+    Scene::ModelIter iter;
+    Vec3d data;
+    TransformType type;
 };
 
 class TransformLightCommand : public BaseCommand
@@ -107,15 +122,16 @@ class TransformLightCommand : public BaseCommand
 public:
     TransformLightCommand() = default;
 
-    TransformLightCommand(Vec3d data, TransformType type, size_t i = 0);
+    TransformLightCommand(Vec3d &data, TransformType type, Scene::LightIter iter);
 
     virtual ~TransformLightCommand() override = default;
 
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    size_t index;
-    Matix4x3d transform_matrix;
+    Scene::LightIter iter;
+    Vec3d data;
+    TransformType type;
 };
 
 class TransformCameraCommand : public BaseCommand
@@ -130,8 +146,8 @@ public:
     virtual void execute(shared_ptr<Scene> scene) override;
 
 private:
-    size_t index;
-    Matix4x3d transform_matrix;
+    Vec3d data;
+    TransformType type;
 };
 
 class RenderCommand : public BaseCommand

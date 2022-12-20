@@ -1,13 +1,24 @@
 #include "Scene.h"
 
-void Scene::add(const shared_ptr<BaseModel> model)
+Scene::Scene(shared_ptr<Camera> &cam) : camera(cam)
 {
-    model_list.push_back(model);
+
 }
 
-void Scene::add(const shared_ptr<Light> light)
+Scene::ModelIter Scene::add(shared_ptr<BaseModel> &model)
+{
+    model_list.push_back(model);
+    ModelIter it = model_list.end();
+    it--;
+    return it;
+}
+
+Scene::LightIter Scene::add(shared_ptr<Light> &light)
 {
     light_list.push_back(light);
+    LightIter it = light_list.end();
+    it--;
+    return it;
 }
 
 void Scene::remove(Scene::ModelIter iter)
@@ -18,6 +29,16 @@ void Scene::remove(Scene::ModelIter iter)
 void Scene::remove(Scene::LightIter iter)
 {
     light_list.erase(iter);
+}
+
+void Scene::setColor(Scene::ModelIter iter, const Color &color)
+{
+    iter->get()->setColor(color);
+}
+
+void Scene::setColor(Scene::LightIter iter, const Color &color)
+{
+    iter->get()->setColor(color);
 }
 
 Scene::ModelIter Scene::ModelsBegin()
@@ -40,7 +61,7 @@ Scene::LightIter Scene::LightsEnd()
     return light_list.end();
 }
 
-shared_ptr<BaseCamera> Scene::Camera()
+shared_ptr<Camera> Scene::cam()
 {
     return camera;
 }

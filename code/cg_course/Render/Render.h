@@ -34,6 +34,7 @@ protected:
     RenderProperties props;
 };
 
+
 class RayTracingRendered : public BaseRenderer
 {
 public:
@@ -45,9 +46,6 @@ public:
 
 private:
     bool emitRay(const shared_ptr<Scene> &scene, const Ray &r, Color &color, int depth);
-
-    double computeLight(const shared_ptr<Scene> &scene, const Point3d &p, const Vec3d &n, const Vec3d &v,
-                        const ObjectProperties &prop);
 
     static bool closest_intersection(const shared_ptr<Scene> &scene, const Ray &r, IntersectionData &data,
                                      double t_min = EPS,

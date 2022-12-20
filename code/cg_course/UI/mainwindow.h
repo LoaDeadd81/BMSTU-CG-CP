@@ -7,6 +7,9 @@
 #include <QGraphicsScene>
 #include <memory>
 #include <list>
+#include <QFileDialog>
+#include <QListWidget>
+#include <QColorDialog>
 
 #include <ctime>
 #include <string>
@@ -14,6 +17,10 @@
 
 #include "SceneManager.h"
 #include "Commands.h"
+
+Q_DECLARE_METATYPE(Scene::ModelIter);
+
+Q_DECLARE_METATYPE(Scene::LightIter);
 
 QT_BEGIN_NAMESPACE
 namespace Ui
@@ -39,28 +46,50 @@ private slots:
 
     void on_DelObjectButton_clicked();
 
-    void on_moveButoon_clicked();
+    void on_mMoveButoon_clicked();
 
-    void on_rotateButton_clicked();
+    void on_mRotateButton_clicked();
 
-    void on_ScaleButton_clicked();
+    void on_mScaleButton_clicked();
 
-    void on_ColorButton_clicked();
+    void on_mColorButton_clicked();
 
-    void on_TexturButton_clicked();
+    void on_mApplyButton_clicked();
+
+    void on_mlistWidget_itemClicked(QListWidgetItem *item);
+
+    void on_lMoveButoon_clicked();
+
+    void on_lColorButton_clicked();
+
+    void on_lApplyButton_clicked();
+
+    void on_llistWidget_itemClicked(QListWidgetItem *item);
+
+    void on_wApplyButton_clicked();
+
+    void on_mTexturButton_clicked();
+
+    void on_cMoveButoon_clicked();
+
+    void on_mRotateButton_2_clicked();
 
 private:
-    int tabIndex();
+    void init_ui();
 
-    int modelIndex();
+    shared_ptr<BaseCommand> makePolModelAddCommand();
 
-    int lightIndex();
+    void set_mTexture(shared_ptr<BaseTexture> &texture);
 
-    Vec3d moveData();
+    void set_mColor(Color color);
 
-    Vec3d rotateData();
+    void set_mProps(ObjectProperties &props);
 
-    Vec3d scaleData();
+    void set_lData(Color &color, double i);
+
+    QList<QListWidgetItem *> mSelectedItems();
+
+    QList<QListWidgetItem *> lSelectedItems();
 
 private:
     Ui::MainWindow *ui;
@@ -72,6 +101,8 @@ private:
     SceneManager manager;
 
     RenderProperties render_props;
+
+    objl::Loader loader;
 };
 
 #endif // MAINWINDOW_H
